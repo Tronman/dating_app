@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var path = require('path');
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 var morgan = require('morgan');
 var session = require('express-session');
 var flash = require('connect-flash');
@@ -12,7 +12,6 @@ var User = require('./models/user');
 var app = express();
 //const Joi = require('joi');
 
-// mongoose.connect('mongodb://localhost:27017/db');
 //render engine
 app.set('view engine','ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -54,6 +53,26 @@ var users = [
         name:'Bongani'
     }
 ];
+app.get('/', (req, res)=>{
+    var title = 'home';
+    res.render('index',{ title:'home'});
+    if(req.body.username && req.body.password){
+        User.authenticate(req.body.username, req.body.password, (error, user)=>{
+            if(error || !user){
+                var err = new Erro('Wrong username or password');
+                err.status(401);
+                return next(err);
+            }else{
+                req.session.userId =user._id;
+                return redirect('/dashboard');
+            }
+        });
+    }else{
+        var err = new Error('All fields are required');
+        err.status(400);
+        return networkInterfaces(err);
+    }
+});
 
 app.get('/register', (req, res)=>{
     var title = 'register';
@@ -78,10 +97,12 @@ app.post('/register', (req, res)=>{
     });
     User.createUser(newUser, function(err, user){
         if(err) throw err;
-        console.log(user);
+         console.log(newUser);
     });
     res.flash('success_msg', 'You are registered and can now login');//
     res.redirect('/dashboard');
+    res.redirect('/register');
+    console.log('registerd');
 });
 
 app.get('/users/:id', (req, res)=>{
