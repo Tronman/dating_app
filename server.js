@@ -1,18 +1,48 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var path = require('path');
+var mongoose = require('mongoose');
+var morgan = require('morgan');
+var session = require('express-session');
+var flash = require('connect-flash');
+var passport = require('passport');
+//const schemaJoi = require('/models/joi');
+var User = require('./models/user');
 var app = express();
 //const Joi = require('joi');
 
+// mongoose.connect('mongodb://localhost:27017/db');
 //render engine
 app.set('view engine','ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 //middleware
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
+app.use(cookieParser());
+app.use(session({
+    secret:'secret',
+    saveUninitialized:true,
+    resave:true
+}));
+app.use(flash());
+
+//Global vars
+app.use((req, res, next)=>{
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 app.use(express.static(path.join(__dirname,'public')));
+
+
+
 
 var users = [
     {
@@ -25,9 +55,33 @@ var users = [
     }
 ];
 
-app.get('/', (req, res)=>{
-    var title = 'home';
-    res.render('index',{ title:'Home'});
+app.get('/register', (req, res)=>{
+    var title = 'register';
+    res.render('registr',{ title:'register'});
+    
+});
+
+app.post('/register', (req, res)=>{
+    var title = 'register';
+    res.render('registr',{ title:'register'});
+    if(req.body.password !== req.body.passwordConf){
+        var err = new Error('Password does not match');
+        err.status(400).send('passwords do not match!');
+        return;
+    }
+    var newUser = new User({
+        username:req.body.username,
+        biography:req.body.biography,
+        gender:req.body.optradio,
+        password:req.body.password,
+        passwordConf:req.body.passwordConf
+    });
+    User.createUser(newUser, function(err, user){
+        if(err) throw err;
+        console.log(user);
+    });
+    res.flash('success_msg', 'You are registered and can now login');//
+    res.redirect('/dashboard');
 });
 
 app.get('/users/:id', (req, res)=>{
@@ -40,7 +94,7 @@ app.get('/users/:id', (req, res)=>{
     }
 });
 
-app.post('/users/user',(req, res) =>{
+app.post('/',(req, res) =>{
     const user = {
         id: users.length + 1,
         name: req.body.name
@@ -61,7 +115,7 @@ app.delete('/users/user/:id',(req,res)=>{
     }
 });
 
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 2000;
 app.listen(port, ()=>{console.log(`server listening on port:${port}`);
 });
 
