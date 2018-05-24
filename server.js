@@ -71,6 +71,7 @@ app.get('/', (req, res)=>{
         var err = new Error('All fields are required');
         return false;//next(err);
     }
+    
 });
 
 app.get('/register', (req, res)=>{
@@ -96,12 +97,14 @@ app.post('/register', (req, res)=>{
     });
     User.createUser(newUser, function(err, user){
         if(err) throw err;
-         console.log(newUser);
+         console.log(user);
     });
-    res.flash('success_msg', 'You are registered and can now login');//
-    res.redirect('/dashboard');
-    res.redirect('/register');
+   // res.flash('success_msg', 'You are registered and can now login');//
+   // res.redirect('/dashboard');
+   // res.redirect('/register');
     console.log('registerd');
+    return false;
+
 });
 
 app.get('/users/:id', (req, res)=>{

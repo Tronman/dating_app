@@ -7,12 +7,7 @@ db.once('open', ()=>{
     console.log('Database connection success!!');
 });
 var UserSchema = new mongoose.Schema({
-    email:{
-        type: String,
-        unique:true,
-        required: true,
-        trim:true
-    },
+
     username:{
         type: String,
         unique:true,
@@ -31,14 +26,16 @@ var UserSchema = new mongoose.Schema({
     }
 });
 
-// UserSchema.methods.createUser = function(newUser, callback){
-//     bcrypt.genSalt(10, function(err, salt){
-//         bcrypt.hash(newUser,password, salt, function(err, hash){
-//             newUser.password = hash;
-//             newUser.save(callback);
-//         });
-//     });
-// }
+var User = module.exports = mongoose.model('User', UserSchema);
+
+module.exports.createUser = function(newUser, callback){
+    bcrypt.genSalt(10, function(err, salt){
+        bcrypt.hash(newUser.password, salt, function(err, hash){
+            newUser.password = hash;
+            newUser.save(callback);
+        });
+    });
+}
 UserSchema.statics.authenticate = (email, password, callback)=>{
     User.findById({email: email}).exec((err, user)=>{
         if(err){
@@ -65,5 +62,36 @@ UserSchema.pre('save', (next)=>{
     }
     next();
 });
-var User = mongoose.model('User', UserSchema);
-module.exports = User;
+
+// router.post('/', (req, res, next)=>{
+//     if(req.body.password !== req.body.passwordConf){
+//        var err = new Error('Password do not match');
+//        err.status = 400;
+//        res.send("password dont match");
+//        return next(err);
+//    }
+
+//    if(req.body.email &&
+//    req.body.username &&
+//    req.body.password &&
+//    req.body.passwordConf){
+//        var UserData = {
+//            email: req.body.email,
+//            username: req.body.username,
+//            password: req.body.password,
+//            passwordConf:req.body.passwordConf
+//        }
+//        User.createUser(UserData, (error, user)=>{
+//            if(error){
+//                return next(error);
+//            }else{
+//                req.session.userId = user._id;
+//                return res.redirect('/profile');
+//            }
+//        });   
+//    } else {
+//        var err = new Error(' All field are required.');
+//        err.status = 400;
+//        return next(err);
+//    }
+// })
