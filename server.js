@@ -59,7 +59,7 @@ app.get('/', (req, res)=>{
     if(req.body.username && req.body.password){
         User.authenticate(req.body.username, req.body.password, (error, user)=>{
             if(error || !user){
-                var err = new Erro('Wrong username or password');
+                var err = new Error('Wrong username or password');
                 err.status(401);
                 return next(err);
             }else{
@@ -69,8 +69,7 @@ app.get('/', (req, res)=>{
         });
     }else{
         var err = new Error('All fields are required');
-        err.status(400);
-        return networkInterfaces(err);
+        return false;//next(err);
     }
 });
 
