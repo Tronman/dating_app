@@ -97,13 +97,14 @@ app.post('/register', (req, res)=>{
     });
     User.createUser(newUser, function(err, user){
         if(err) throw err;
-         console.log(user);
+       //  console.log(err);
     });
-   // res.flash('success_msg', 'You are registered and can now login');//
-   // res.redirect('/dashboard');
+    console.log(newUser);
+    //req.flash('success_msg', 'You are registered and can now login');//
+  //  res.redirect('/');
    // res.redirect('/register');
-    console.log('registerd');
-    return false;
+    // console.log('registerd');
+     return false;
 
 });
 

@@ -36,8 +36,8 @@ module.exports.createUser = function(newUser, callback){
         });
     });
 }
-UserSchema.statics.authenticate = (email, password, callback)=>{
-    User.findById({email: email}).exec((err, user)=>{
+UserSchema.statics.authenticate = (username, password, callback)=>{
+    User.findById({username: username}).exec((err, user)=>{
         if(err){
             return callback(err);
         }else if(!user){
